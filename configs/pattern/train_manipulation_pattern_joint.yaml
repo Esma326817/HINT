@@ -1,0 +1,90 @@
+# Joint manipulation-pattern router training for all three paper tasks.
+# Run from the repository root:
+#   python -m pattern.train \
+#     --config configs/pattern/train_manipulation_pattern_joint.yaml
+
+dataset:
+  camera_keys:
+    global: images.global
+    left_wrist: images.left_wrist
+    right_wrist: images.right_wrist
+  state_key: state
+  effort_key: effort
+  sources:
+    - task: sorting
+      root: /dataset/robot/real_world/piper/lerobot/classify/classify_mixed
+      num_episodes: 50
+    - task: spelling
+      root: /dataset/robot/real_world/piper/lerobot/letter/piper_letter_v2_big_annotation_merged
+      num_episodes: 80
+    - task: peg_in_hole
+      root: /dataset/robot/real_world/piper/lerobot/peg_in_hole/peg_in_hole_v4_5_merged
+      num_episodes: 150
+  val_ratio: 0.1
+  seed: 0
+  image_height: 120
+  image_width: 160
+  boundary_window: 5
+  boundary_weight: 0.5
+  # Maximum requested frames per streaming decode call.
+  streaming_decode_chunk_size: 16
+
+train:
+  output_dir: /data/checkpoints/finetuned/reasonvla/manipulation_pattern/joint_three_tasks
+  epochs: 50
+  batch_size: 64
+  num_workers: 32
+  prefetch_factor: 2
+  log_every: 50
+  # CUDA event timing for the first epoch only (includes transfer and update).
+  profile_batches: 20
+  lr:
+    lr: 5.0e-5
+    lr_scheduler: warmup_cosine
+    peak_lr: 5.0e-5
+    warmup_epoch: 5
+    decay_epoch: 0
+    decay_lr: 3.0e-7
+  weight_decay: 5.0e-4
+  label_smoothing: 0.05
+  progress_loss_weight: 0.5
+  ckpt_every: 10
+  grad_clip_norm: 5.0
+
+model:
+  fusion_hidden_dim: 128
+  num_patterns: 6
+  predict_progress: true
+  num_progress_heads: 4
+
+  image_encoder:
+    num_times: 1
+    num_cameras: 3
+    # Internal camera order; dataset.camera_keys defines the LeRobot fields.
+    camera_names: [global, left_wrist, right_wrist]
+    feature_dim: 64
+    hidden_dim: 128
+    stem_hidden_channels: 32
+    pretrained: true
+    finetune_layers: [3, 4]
+
+  lowdim_encoder:
+    # Number of values per frame in dataset.state_key.
+    state_dim: 14
+    # Number of values per frame in dataset.effort_key.
+    effort_dim: 14
+    separate: true
+    embed_dim: 64
+    hidden_dim: 128
+    num_layers: 1
+    dropout: 0.0
+
+wandb:
+  enabled: true
+  project: manipulation-pattern-router
+  entity: null
+  name: joint-three-tasks
+
+device: cuda
+multi_gpu: true
+gpu_ids: [2, 3]

@@ -1,0 +1,62 @@
+# Letter spelling (offline / annotation).
+# Scene phrases and target-word knobs: configs/tasks/letter.yaml
+
+extends: _base
+
+output:
+  root: outputs
+  log_dir: outputs/logs
+
+task:
+  name: letter
+  semantic_intent_injection: both
+  model_input_resolution: [224, 224]
+  output_resolution: [224, 224]
+
+dataset:
+  task_context:
+    source: none
+    required: false
+    instruction_field: instruction
+    fields: []
+    task_position: 0
+
+subtask:
+  enabled: true
+  advance_on_return_to: free_move
+  completion_stages: [dexterous_contact, transport_contact]
+
+stage_source:
+  mode: annotation
+  predict:
+    checkpoint: /data/checkpoints/reasonvla/stage/piper_letter/v2_big_letter/epoch_100.pt
+    device: cuda
+    single_frame: true
+
+stage_aware:
+  enabled: true
+  global_render_mode: block_mask
+  stage_stability_frames: 3
+  free_move_grounding_delay_frames: 30
+
+grounding:
+  reset_detector: dino
+  grounder: qwen
+  qwen:
+    max_new_tokens: 64
+    output_mode: json
+    reset_multi_max_new_tokens: 512
+    board_pad: 6
+  box_threshold: 0.22
+  text_threshold: 0.18
+  max_box_area_ratio: 0.5
+  keep_top_k: 1
+  reground_on_prompt_change: true
+  invalidate_non_primary_on_lost: true
+  min_mask_area_ratio: 0.002
+
+tracker:
+  backend: sam2
+
+vlm:
+  model_path: null

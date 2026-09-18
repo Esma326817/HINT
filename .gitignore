@@ -1,0 +1,59 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+.envs/
+ENV/
+
+# Test / coverage artifacts
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.mypy_cache/
+.pyre/
+.pytype/
+.ruff_cache/
+
+# Local tests (not shipped)
+tests/
+
+# Logs
+*.log
+logs/
+
+# Local environment config
+.env
+.env.*
+
+# Local outputs
+outputs/
+temp
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.codex
+.claude
+.agents
+
+# Policy π local artifacts
+policy/pi/assets/
+policy/pi/checkpoints/
+policy/pi/data/
+policy/pi/wandb/
+policy/pi/.hf_cache/

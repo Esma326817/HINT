@@ -1,0 +1,44 @@
+# Template for a new manipulation task.
+# Copy to configs/tasks/<name>.yaml, fill the sections, then set task.name.
+# YAML-only is enough for pick-and-place over detected objects. Add
+# src/task/task_hooks/<name>.py with HOOKS only when you need episode-plan parsing
+# or per-frame box lookup.
+
+name: my_task
+instruction: Describe the long-horizon instruction the robot should follow.
+
+scene:
+  - key: objects
+    role: movable           # movable | placement | landmark
+    boxes: all              # all matching boxes; omit for one
+    ground_prompt: objects on the table
+    recognize_crop: true    # run recognition.crop on each detected box
+  - key: destination
+    role: placement
+    ground_prompt: the destination container
+    recognize_crop: false   # placement boxes are used as-is
+
+context:
+  source: detected          # detected | word_chars | fixed
+  order: left_to_right
+  place_by:
+    example_category: destination
+
+commitment:
+  free: "the {label}"
+  contact: "the {placement}"
+
+recognition:
+  crop: |
+    You are looking at a crop of one object.
+
+    Return JSON only:
+    {"label": "<short object name in lowercase>", "category": "<category>"}
+  crop_parser: label_category_json
+  crop_classify: category
+
+classify:
+  category:
+    labels: [example_category]
+    aliases:
+      example_category: [example_category, example]

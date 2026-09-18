@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hint-framework"
+version = "0.1.0"
+description = "Task perception, manipulation patterns, and intent injection for HINT"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+dynamic = ["dependencies"]
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[tool.setuptools]
+package-dir = {"" = "src", "pattern" = "pattern"}
+
+[tool.setuptools.packages.find]
+where = ["src", "."]
+include = [
+    "common", "common.*",
+    "task", "task.*",
+    "pattern", "pattern.*",
+    "perception", "perception.*",
+    "intent", "intent.*",
+    "runtime", "runtime.*",
+    "inference", "inference.*",
+    "dataset_export", "dataset_export.*",
+]
+namespaces = false
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

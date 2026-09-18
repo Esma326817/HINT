@@ -1,0 +1,14 @@
+easydict
+numpy
+pandas
+pyarrow
+pyyaml
+torch
+torchvision
+tqdm
+wandb
+opencv-python
+pillow
+# Match the installed PyTorch CUDA build when GPU/NPP libraries are available.
+# Example: pip install 'torchcodec==0.11.0+cu128' --index-url=https://download.pytorch.org/whl/cu128
+torchcodec==0.9.1

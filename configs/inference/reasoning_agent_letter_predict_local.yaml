@@ -1,0 +1,74 @@
+# Letter spelling (local online).
+
+extends: _base
+
+output:
+  root: /home/hzx3090/piper/reasonvla/ReasoningAgent/outputs
+  log_dir: /home/hzx3090/piper/reasonvla/ReasoningAgent/outputs/logs
+  render_image: render_image/letter_IntentAgent_demo
+
+task:
+  name: letter
+  semantic_intent_injection: both
+  model_input_resolution: [224, 224]
+  output_resolution: [224, 224]
+
+subtask:
+  enabled: true
+  advance_on_return_to: free_move
+  completion_stages: [dexterous_contact, transport_contact]
+
+stage_aware:
+  enabled: true
+  global_render_mode: block_mask
+  free_move_grounding_delay_frames: 1
+  stage_stability_frames: 1
+  progress_gate:
+    mode: "off"
+    start_threshold: 0.4
+    end_threshold: 0.6
+    override_after_frames: 5
+
+stage_source:
+  mode: predict
+  predict:
+    checkpoint: /mnt/hzx/data/ckpt/manipulation_pattern/joint_three_tasks/best.pt
+    device: cuda
+    single_frame: true
+
+grounding:
+  dino:
+    checkpoint: /mnt/hzx/data/ckpt/base_models/groundingdino_swint_ogc.pth
+  reset_detector: dino
+  grounder: qwen
+  qwen:
+    max_new_tokens: 16
+    output_mode: flat_array
+    reset_multi_max_new_tokens: 192
+    board_pad: 6
+  box_threshold: 0.22
+  text_threshold: 0.18
+  max_box_area_ratio: 0.5
+  keep_top_k: 1
+  reground_on_prompt_change: true
+  invalidate_non_primary_on_lost: true
+  min_mask_area_ratio: 0.002
+  verify_wrist_target: false
+  ground_every_step: false
+
+tracker:
+  backend: sam2_memory
+  sam2_checkpoint: "/mnt/hzx/data/ckpt/base_models/sam2.1_hiera_small.pt"
+  memory_frames: 24
+
+deploy:
+  infer_mode: sync
+  img_url: "http://127.0.0.1:8767"
+  track_fps: 30
+  view_map: {}
+
+render:
+  debug_overlay: true
+
+vlm:
+  model_path: /mnt/hzx/data/ckpt/base_models/Qwen3-VL-8B-Instruct

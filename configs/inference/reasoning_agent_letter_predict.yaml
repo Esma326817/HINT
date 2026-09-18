@@ -1,0 +1,64 @@
+# Letter spelling (online predict).
+
+extends: _base
+
+output:
+  render_image: render_image/letter
+
+task:
+  name: letter
+  semantic_intent_injection: both
+  model_input_resolution: [224, 224]
+  output_resolution: [224, 224]
+
+subtask:
+  enabled: true
+  advance_on_return_to: free_move
+  completion_stages: [dexterous_contact, transport_contact]
+
+stage_aware:
+  enabled: true
+  global_render_mode: block_mask
+  stage_stability_frames: 1
+  progress_gate:
+    mode: auto
+    start_threshold: 0.3
+    end_threshold: 0.7
+    override_after_frames: 5
+    stages: [free_move]
+
+stage_source:
+  mode: predict
+  predict:
+    checkpoint: /data/checkpoints/finetuned/reasonvla/manipulation_pattern/joint_three_tasks/best.pt
+    device: cuda
+    single_frame: true
+
+grounding:
+  reset_detector: dino
+  grounder: qwen
+  qwen:
+    max_new_tokens: 16
+    output_mode: flat_array
+    reset_multi_max_new_tokens: 192
+    board_pad: 6
+  box_threshold: 0.25
+  text_threshold: 0.2
+  max_box_area_ratio: 0.5
+  keep_top_k: 1
+  reground_on_prompt_change: true
+  invalidate_non_primary_on_lost: true
+  min_mask_area_ratio: 0.002
+  verify_wrist_target: false
+  ground_every_step: true
+
+tracker:
+  backend: sam2
+  sam2_checkpoint: "/data/checkpoints/base_models/sam2.1_hiera_large.pt"
+  sam2_model_cfg: "configs/sam2.1/sam2.1_hiera_l.yaml"
+
+render:
+  debug_overlay: true
+
+vlm:
+  model_path: null

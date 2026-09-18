@@ -1,0 +1,173 @@
+# Peg-in-hole: place the selected block in the slot, then the matching peg in its hole.
+
+name: peg_in_hole
+hooks: peg_in_hole
+instruction: >
+  Place the selected block into the black slot, then insert the matching peg
+  into its hole.
+task_context: |-
+  Peg-in-hole has two subtasks: first move the selected colored rectangular
+  block into the black slot, then insert the selected shape peg into the
+  matching hole. Once an object is held, look at the destination slot or hole.
+
+plan:
+  fields: [selected_block_color, selected_block_position, selected_peg_color, selected_peg_shape]
+
+scene:
+  - key: block
+    role: movable
+    category: rectangular_block
+    recognize_crop: false
+    ground_prompt: the {block_position} {block_color} rectangular block
+    distinguish: left_to_right
+    as: [left, middle, right]
+    select_by: block_position
+    locate: "{block_locate}"
+  - key: peg
+    role: movable
+    category: shape_peg
+    recognize_crop: false
+    optional: true
+    ground_prompt: the {peg_color} {peg_shape} peg
+    select_by: peg_shape
+    locate: shape_pegs
+    missing_message: selected shape peg not detected during peg-in-hole reset
+  - key: slot
+    role: placement
+    recognize_crop: false
+    ground_prompt: the black rectangular slot
+  - key: hole
+    role: placement
+    optional: true
+    recognize_crop: false
+    ground_prompt: the {peg_shape} hole in the {block_color} rectangular block
+    fallback_bbox_from: block
+
+context:
+  source: fixed
+  steps:
+    - pick: block
+      place: slot
+    - pick: peg
+      place: hole
+
+commitment:
+  free: "the {label}"
+  contact: "the {placement}"
+  strip_spatial_on: [pre_contact]
+
+tracking:
+  known_bbox_seeds:
+    - stages: [transport_contact]
+      progress_indices: [0]
+    - action_groups: [free]
+      progress_indices: [0, 1]
+
+recognize_movables: false
+exclude_movables_inside_placements: false
+
+recognition:
+  landmark: |
+    Look at the color-and-shape peg-in-hole demonstration.
+
+    Identify the selected colored rectangular block, its visible hole shapes from
+    top to bottom, and the selected shape peg.
+
+    Output exactly one JSON object with these fields:
+    {
+      "selected_block_color": "<color, e.g. red|blue|green|yellow|unknown>",
+      "selected_block_holes_top_to_bottom": ["shape1", "shape2", "shape3"],
+      "selected_peg_color": "<color, e.g. white|blue|unknown>",
+      "selected_peg_shape": "l shaped|circular|rectangular|unknown",
+      "instruction": "place the <block_color> rectangular block into the black rectangular slot, then insert the <peg_color> <shape> peg into the <shape> hole in the <block_color> rectangular block"
+    }
+
+    Use only these shape names: l shaped, circular, rectangular, unknown. Output
+    JSON only.
+  crop: |
+    You are looking at a crop from a color-and-shape peg-in-hole scene.
+
+    Name the main object or feature: a colored rectangular block, the black
+    rectangular slot, a colored shape peg, or a shaped hole. Use l shaped, circular,
+    or rectangular for shapes. Return only the name.
+
+x-shapes: &shapes
+  labels: [l shaped, circular, rectangular]
+  aliases:
+    l shaped: [l shaped, l-shaped, l shape, right angle, right angled]
+    circular: [circular, circle, round, cylinder, cylindrical]
+    rectangular: [rectangular, rectangle, square]
+
+x-ordered: &ordered
+  method: ordered_instances
+  expected_count: 3
+  require_all_labels: true
+
+classify:
+  peg_shape:
+    <<: *shapes
+    prompt: |-
+      This crop contains exactly one peg. Classify
+      the geometric outline of its visible top face. Ignore the black holder,
+      shadows, perspective, and the darker vertical side face.
+      - l shaped: two perpendicular rectangular arms, one concave inner corner
+      - rectangular: four straight sides and four corners
+      - circular: a smooth round boundary without corners
+      Output exactly one label: l shaped, circular, or rectangular.
+  hole_shape:
+    <<: *shapes
+    prompt: |-
+      Panels 1-3 each show one dark hole. Assign l shaped, circular, and
+      rectangular exactly once by the dark interior boundary (ignore color,
+      shadow, and source position). Return JSON only in this compact form:
+      [[1,"l shaped"],[2,"circular"],[3,"rectangular"]]
+  block_color:
+    labels: [red, blue, green]
+  block_position:
+    labels: [left, middle, right]
+    aliases:
+      left: [left, leftmost]
+      middle: [middle, center, centre, central]
+      right: [right, rightmost]
+    context_pattern: "\\b{label}\\s+(?:[a-z]+\\s+){{0,3}}(?:rectangular\\s+)?block\\b"
+
+adapters:
+  robust_detection:
+    rectangular_blocks:
+      <<: *ordered
+      classify: block_position
+      order_axis: x
+      box_filter: {method: compact, max_area_ratio: 0.18, max_width_ratio: 0.45, max_height_ratio: 0.70}
+      prompt: |-
+        Find the three separate rectangular blocks sitting on the table in a
+        left-to-right row. They may all be the same color. Each block is one
+        individual rectangle with three dark shaped holes. Exclude the black
+        destination slot, the black peg holder, and the pegs.
+        Return one tight bounding box around each complete block. Never combine
+        multiple blocks in one box.
+    shape_pegs:
+      <<: *ordered
+      classify: peg_shape
+      order_axis: y
+      box_filter: {method: compact, max_area_ratio: 0.045, max_width_ratio: 0.20, max_height_ratio: 0.25}
+      prompt: |-
+        Find the three separate removable {peg_color} pegs protruding from the black
+        holder at the right side of the image. A peg is one individual {peg_color} solid;
+        the long black base is only their holder and is not a peg.
+        Return one tight bounding box around the complete visible {peg_color} part of each
+        individual peg. Exclude the black holder. Never combine multiple pegs in one
+        box.
+    block_holes:
+      method: separate_and_joint_classify
+      classify: hole_shape
+      expected_count: 3
+      require_all_labels: true
+      search_pad: 40
+      min_crop_side: 384
+      classification_pad: 8
+      instance_min_new_tokens: 72
+      classification_max_new_tokens: 64
+      prompt: |-
+        Box the 3 separate dark hole interiors in this colored block crop.
+        Exclude block rim, slot, robot, shadows, and table perforations.
+        Return only normalized 0-1000 JSON: [[x1,y1,x2,y2],...]

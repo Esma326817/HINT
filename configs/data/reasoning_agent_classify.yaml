@@ -1,0 +1,49 @@
+# Fruit/vegetable sorting (offline / annotation).
+
+extends: _base
+
+output:
+  root: outputs
+  log_dir: outputs/logs
+
+task:
+  name: fruit_vegetable
+  plan_from_prompt: true
+  semantic_intent_injection: both
+  model_input_resolution: [224, 224]
+  output_resolution: [224, 224]
+
+dataset:
+  task_context:
+    source: lerobot
+    required: false
+    instruction_field: instruction
+    fields: []
+    task_position: 0
+
+stage_source:
+  mode: annotation
+
+stage_aware:
+  enabled: true
+  global_render_mode: block_mask
+  stage_stability_frames: 1
+  free_move_grounding_delay_frames: 30
+
+grounding:
+  reset_detector: dino
+  grounder: qwen
+  qwen:
+    max_new_tokens: 64
+    output_mode: json
+    board_pad: 6
+  box_threshold: 0.22
+  text_threshold: 0.18
+  max_box_area_ratio: 0.5
+  keep_top_k: 3
+  verify_wrist_target: true
+  verify_top_k: 1
+  ground_every_step: false
+
+tracker:
+  backend: bbox_mask

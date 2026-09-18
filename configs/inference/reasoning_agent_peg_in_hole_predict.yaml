@@ -1,0 +1,95 @@
+# Peg-in-hole color/shape (online predict).
+#
+# task.plan_from_prompt:
+#   true  → use free-text /reset prompt when it names color+shape
+#   false → always use the peg_in_hole defaults below
+
+extends: _base
+
+output:
+  root: /home/rvilab/Projects/reasonvla/ReasoningAgent/outputs
+  log_dir: /home/rvilab/Projects/reasonvla/ReasoningAgent/outputs/logs
+  render_image: render_image/peg_in_hole_walloss
+
+task:
+  name: peg_in_hole
+  semantic_intent_injection: highlighting
+  model_input_resolution: [224, 224]
+  output_resolution: [640, 480]
+  plan_from_prompt: false
+  peg_in_hole:
+    selected_block_color: red
+    selected_peg_color: white
+    selected_peg_shape: l shaped
+
+subtask:
+  enabled: true
+  advance_on_return_to: free_move
+  completion_stages: [dexterous_contact, transport_contact]
+
+stage_aware:
+  enabled: true
+  global_render_mode: block_mask
+  free_move_grounding_delay_frames: 1
+  stage_stability_frames: 1
+  progress_gate:
+    mode: auto
+    start_threshold: 0.3
+    end_threshold: 0.7
+    override_after_frames: 5
+    stages: [free_move]
+  skip_stages: [dexterous_contact]
+
+stage_source:
+  mode: predict
+  predict:
+    checkpoint: /data/checkpoints/finetuned/reasonvla/manipulation_pattern/joint_three_tasks/best.pt
+    device: cuda
+    single_frame: true
+
+stages:
+  ids:
+    4:
+      name: dexterous_contact
+      cameras: [left_wrist]
+      prompt: "the insertion target"
+    5:
+      name: dexterous_contact
+      cameras: [right_wrist]
+      prompt: "the insertion target"
+
+grounding:
+  dino:
+    config_path: GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py
+    result_dir: /home/rvilab/Projects/reasonvla/ReasoningAgent/outputs/dino_detect
+  reset_detector: qwen
+  grounder: qwen
+  qwen:
+    max_new_tokens: 64
+    output_mode: flat_array
+    reset_multi_max_new_tokens: 192
+    board_pad: 6
+  box_threshold: 0.22
+  text_threshold: 0.18
+  max_box_area_ratio: 0.5
+  keep_top_k: 1
+  reground_on_prompt_change: true
+  invalidate_non_primary_on_lost: true
+  min_mask_area_ratio: 0.001
+  verify_wrist_target: false
+  ground_every_step: false
+
+tracker:
+  backend: sam2_memory
+  sam2_checkpoint: "/data/checkpoints/base_models/sam2.1_hiera_large.pt"
+  sam2_model_cfg: "configs/sam2.1/sam2.1_hiera_l.yaml"
+  memory_frames: 24
+
+deploy:
+  infer_mode: sync
+  img_url: "http://127.0.0.1:8767"
+  track_fps: 30
+  view_map: {}
+
+render:
+  debug_overlay: true

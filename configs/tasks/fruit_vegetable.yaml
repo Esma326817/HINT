@@ -1,0 +1,81 @@
+# Fruit/vegetable sorting: one pick-and-place subtask per detected object.
+# Episode prompts follow ``instruction``, swapping only the destinations.
+
+name: fruit_vegetable
+instruction: Sort fruits into the pink (red) basket and vegetables into the blue basket.
+
+scene:
+  - key: objects
+    role: movable
+    boxes: all
+    ground_prompt: fruits and vegetables on the table
+    recognize_crop: true
+    max_box_area_ratio: 0.18
+  - key: blue_basket
+    role: placement
+    ground_prompt: the blue plastic basket
+    recognize_crop: false
+  - key: pink_basket
+    role: placement
+    ground_prompt: the pink plastic basket
+    recognize_crop: false
+
+context:
+  source: detected
+  order: left_to_right
+  place_by:
+    fruit: pink_basket
+    vegetable: blue_basket
+
+commitment:
+  free: "the {label}"
+  contact: "the {placement}"
+
+tracking:
+  known_bbox_seeds:
+    # Unpicked tabletop objects are stationary. Keep the detected instance
+    # identity instead of resolving an ambiguous food name again globally.
+    - stages: [free_move]
+
+recognition:
+  crop: |
+    You are looking at a crop of one object from a sorting scene.
+
+    Return JSON only:
+    {"label": "<short object name in lowercase>", "category": "fruit|vegetable"}
+
+    Rules:
+    - Use a short everyday name for the whole object you see.
+    - Use the sorting-task convention for category: tomato is a vegetable.
+      Always return "vegetable" when the object label is tomato.
+    - Decide fruit vs vegetable from what you see for every other object.
+    - If connected parts are visible (leaf, stem, handle, body), name the complete
+      physical object, not an attached part as a separate object.
+    - Prefer a common base name over color, variety, or part-only wording.
+    - Ignore the table, containers, robot arms, and background clutter.
+
+    The objects in this scene are plastic toy foods. Identify the food represented
+    by the toy, rather than its artificial color or material. Use its overall shape
+    and characteristic details: a peach can have a leaf and a crease, while an
+    onion has a papery bulb, root base and neck. A potato is an irregular tan tuber
+    with small eyes; a strawberry has a leafy cap and seeds. Do not classify an
+    object as a tomato just because it is red.
+  crop_parser: label_category_json
+  crop_classify: category
+  crop_min_side: 256
+  category_fallback:
+    classify: category
+    grounding_prompt: "the {category}"
+
+classify:
+  category:
+    labels: [fruit, vegetable]
+    aliases:
+      fruit: [fruit, fruits]
+      vegetable: [vegetable, vegetables, veggie, veggies]
+  placement:
+    aliases:
+      pink_basket: [red basket, pink, red]
+
+settings:
+  object_sequence: []

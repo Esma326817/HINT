@@ -1,0 +1,28 @@
+# Manipulation-pattern router evaluation config. Override fields here, then run:
+#   python -m pattern.evaluation.evaluate --config configs/pattern/eval.yaml
+
+checkpoint: outputs/manipulation_pattern_router/best.pt
+
+dataset:
+  # Null inherits dataset keys from the training checkpoint.
+  camera_keys: null
+  state_key: null
+  effort_key: null
+  # Required for a joint checkpoint; choose sorting, spelling, or peg_in_hole.
+  task: sorting
+  root: null
+  image_height: null
+  image_width: null
+  streaming_decode_chunk_size: null
+  boundary_window: null
+  boundary_weight: null
+
+eval:
+  output_dir: null
+  episodes: null
+  batch_size: 32
+  num_workers: 4
+  smooth_k: 2
+  limit_samples: 0
+
+device: cuda

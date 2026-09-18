@@ -1,0 +1,27 @@
+# Identical left/right bowls. Do not merge into fruit_vegetable.yaml: baskets
+# are found by appearance (separate scene keys), bowls by bbox order (``as``).
+# Crop recognition and category classify inherit; placement ids come from ``as``.
+
+extends: fruit_vegetable
+name: fruit_vegetable_bowl
+instruction: Sort fruits into the right bowl and vegetables into the left bowl.
+
+scene:
+  - key: objects
+    role: movable
+    boxes: all
+    ground_prompt: fruits and vegetables on the table
+    recognize_crop: true
+  - key: bowls
+    role: placement
+    boxes: all
+    ground_prompt: the bowls on the table
+    recognize_crop: false
+    distinguish: left_to_right
+    as: [left_bowl, right_bowl]
+    render: area
+
+context:
+  place_by:
+    fruit: right_bowl
+    vegetable: left_bowl

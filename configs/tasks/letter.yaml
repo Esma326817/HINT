@@ -1,0 +1,82 @@
+# Letter spelling: one subtask per character of the word on the card above the board.
+#
+# ``ground_prompt`` is the Qwen phrase. Letter reset uses GroundingDINO
+# (``grounding.reset_detector: dino``), so ``dino_prompt`` must stay the short
+# synonym caption the detector was tuned on — do not fold the Qwen wording into it.
+
+name: letter
+hooks: letter
+instruction: Spell the word by placing each letter block on the board.
+
+scene:
+  - key: letter_blocks
+    role: movable
+    boxes: all
+    optional: true
+    ground_prompt: letter blocks on the table
+    dino_prompt: letter blocks
+    recognize_crop: true
+    max_box_area_ratio: 0.03
+  - key: cutting_board
+    role: placement
+    ground_prompt: the wooden cutting board
+    dino_prompt: cutting board . chopping board . wooden cutting board .
+    recognize_crop: false
+    render: area
+    max_box_area_ratio: 0.9
+
+read_from:
+  relative_to: cutting_board
+  region: above
+  parse: last_word
+
+precise_ground:
+  of: cutting_board
+  count_from: word_length
+  axis: x
+
+exclude_inside: [cutting_board]
+
+context:
+  source: word_chars
+
+commitment:
+  free: "the {label} letter block"
+  contact: the target placement area
+
+tracking:
+  known_bbox_seeds:
+    - stages: [transport_contact]
+
+recognition:
+  landmark: |
+    You are analyzing a cropped image from a robot spelling task.
+
+    The image usually contains a target card or target object above the placement board.
+
+    Your job is to identify the single word the robot should spell.
+
+    Rules:
+    - If a card contains a picture, identify the picture content, not the card or paper.
+    - If a real target object is shown, identify the object category, not its geometric shape.
+    - For a cardboard/open container, answer box, not cube.
+    - Ignore the card border, white background, table, placement board, robot arms, and scattered blocks.
+    - Do not answer card, paper, rectangle, cube, or image unless that exact thing is clearly printed as the target word.
+    - If the target is a number, output its lowercase English word instead of the digit.
+    - If the target is an object, output a simple generic category word, not a fine-grained subtype.
+      Prefer the common base category over age/breed/subtype words.
+    - Output exactly one lowercase English word with no explanation.
+  crop: |
+    You are looking at a crop that contains one letter block.
+
+    Return the single lowercase English letter printed on the block. If uncertain,
+    choose the most likely letter.
+  landmark_parser: last_word
+  crop_parser: single_letter
+  crop_category: letter_block
+
+classify: {}
+
+settings:
+  allowed_target_words: []
+  fallback_target_word: ""

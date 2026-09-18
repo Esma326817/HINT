@@ -1,0 +1,57 @@
+# Shared online-serving defaults. Task files set ``extends: _base``.
+
+stages:
+  column: stage_id_gt
+  default_id: 1
+  ids:
+    1:
+      name: free_move
+      cameras: [global]
+      prompt: "the target object"
+    2:
+      name: pre_contact
+      cameras: [left_wrist]
+      prompt: "the object to grasp"
+    3:
+      name: pre_contact
+      cameras: [right_wrist]
+      prompt: "the object to grasp"
+    4:
+      name: dexterous_contact
+      cameras: [left_wrist]
+      prompt: "the contact target"
+    5:
+      name: dexterous_contact
+      cameras: [right_wrist]
+      prompt: "the contact target"
+    6:
+      name: transport_contact
+      cameras: [global]
+      prompt: "the placement target"
+
+cameras:
+  global: images.global
+  left_wrist: images.left_wrist
+  right_wrist: images.right_wrist
+
+grounding:
+  dino:
+    checkpoint: /data/checkpoints/base_models/groundingdino_swint_ogc.pth
+
+tracker:
+  sam2_checkpoint: "/data/checkpoints/base_models/sam2.1_hiera_small.pt"
+  sam2_model_cfg: "configs/sam2.1/sam2.1_hiera_s.yaml"
+  device: cuda
+
+render:
+  enabled: true
+  color: [0, 220, 120]
+  alpha: 0.32
+  outline_color: [255, 255, 255]
+  outline_width: 3
+
+vlm:
+  model_path: /data/checkpoints/base_models/Qwen3-VL-8B-Instruct
+  model_class: auto
+  generate_prompt: false
+  max_new_tokens: 48
