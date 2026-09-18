@@ -44,7 +44,9 @@ tracking holds that commitment between updates. The tracked intent is injected
 into the action policy with visual highlighting and an attention prior, without
 adding trainable parameters to the foundation model.
 
-
+<p align="center">
+  <img src="assets/teaser.jpg" alt="HINT teaser" width="100%">
+</p>
 
 ## 📁 1. Repository Structure
 
